@@ -24,14 +24,14 @@ cd FileManagement
 2. Create a virtual environment and activate it:
 
 ```bash
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows use: venv\Scripts\activate
 ```
 
 3. Install the required packages:
 
 ```bash
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 4. Create a `.env` file in the root directory with the following content:
@@ -45,10 +45,10 @@ UPLOAD_FOLDER=app/static/uploads
 5. Run the application:
 
 ```bash
-python run.py
+gunicorn -w 4 -b 127.0.0.1:8000 run:app
 ```
 
-The application will be available at `http://localhost:5000`
+The application will be available at `http://localhost:8000`
 
 ## Usage
 
@@ -82,6 +82,7 @@ file_auth_system/
 │   ├── __init__.py
 │   ├── models.py
 │   ├── routes.py
+│   ├── config.py
 │   ├── static/
 │   │   └── uploads/
 │   └── templates/
@@ -90,3 +91,43 @@ file_auth_system/
 │       └── dashboard.html
 └── run.py
 ```
+
+## Production Configuration
+
+1. Set up environment variables in production:
+
+```bash
+export FLASK_ENV=production
+export SECRET_KEY=your-secure-secret
+export SQLALCHEMY_DATABASE_URI=postgresql://user:pass@localhost/dbname
+export REDIS_URL=redis://localhost:6379/0
+```
+
+2. Set up Nginx as a reverse proxy:
+
+```nginx
+server {
+    listen 80;
+    server_name your_domain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        client_max_body_size 5G;
+    }
+}
+```
+
+3. Set up monitoring and logging:
+
+- Use Sentry for error tracking
+- Set up Prometheus metrics
+- Configure proper logging
+
+4. Regular maintenance:
+
+- Set up automated backups
+- Implement file cleanup policies
+- Monitor disk space usage
+- Set up alerts for system metrics
